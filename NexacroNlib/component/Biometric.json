@@ -1,0 +1,10 @@
+﻿{
+	"name": "Biometric",
+	"version": "1.0.0.0",
+	"description": "Biometricfor nexacro platform",
+	"license": "",
+	"scripts": [
+        "Biometric/Biometric.js",
+	]
+}
+//@ sourceURL=Biometric.json
