@@ -284,7 +284,6 @@ public class BiometricObject extends NexacroPlugin {
             send(CODE_ERROR, METHOD_CALLMETHOD + "생체인증 옵션이 켜져있지 않습니다.");
         }
 
-
         if (biometricEncryptOption) {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                 try {
@@ -297,6 +296,8 @@ public class BiometricObject extends NexacroPlugin {
                     send(CODE_ERROR,e);
                 }
             }
+        } else if (promptInfo == null ){
+            send(CODE_ERROR, METHOD_CALLMETHOD + "생체인증 옵션이 켜져있지 않습니다.");
         } else {
             biometricPrompt.authenticate(promptInfo);
         }
