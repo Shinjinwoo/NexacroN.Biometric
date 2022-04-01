@@ -199,7 +199,7 @@ public class BiometricObject extends NexacroPlugin {
 
                         jsonObject.put("authType", result.getAuthenticationType());
                         if(result.getCryptoObject() != null) {
-                            jsonObject.put("cryptoObject", result.getCryptoObject());
+                            jsonObject.put("cryptoObject", result.getCryptoObject().getCipher().getAlgorithm());
                         }
 
                         send(mServiceId, CALL_BACK, CODE_SUCCES, jsonObject.toString());
@@ -254,7 +254,6 @@ public class BiometricObject extends NexacroPlugin {
                 keyGenerator = KeyGenerator.getInstance(
                         KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
                 keyGenerator.init(keyGenParameterSpec);
-
                 if (keyGenerator != null) {
                     keyGenerator.generateKey();
                 }
@@ -265,6 +264,8 @@ public class BiometricObject extends NexacroPlugin {
             e.printStackTrace();
         }
     }
+
+
 
 
     public void executeBiometricPrompt(boolean biometricStrong, boolean biometricWeak, boolean biometricDevice, boolean biometricEncryptOption){
@@ -285,11 +286,23 @@ public class BiometricObject extends NexacroPlugin {
         }
 
         if (biometricEncryptOption) {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
                 try {
                     Cipher cipher = getCipher();
+                    generateSecretKey(new KeyGenParameterSpec.Builder(
+                            mKeyName,
+                            KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                            .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
+                            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
+                            .setUserAuthenticationRequired(true)
+                            // Invalidate the keys if the user has registered a new biometric
+                            // credential, such as a new fingerprint. Can call this method only
+                            // on Android 7.0 (API level 24) or higher. The variable
+                            // "invalidatedByBiometricEnrollment" is true by default.
+                            .setInvalidatedByBiometricEnrollment(true)
+                            .build());
                     SecretKey secretKey = getSecretKey();
-                    cipher.init(Cipher.DECRYPT_MODE, secretKey);
+                    cipher.init(Cipher.ENCRYPT_MODE, secretKey);
                     biometricPrompt.authenticate(promptInfo,
                             new BiometricPrompt.CryptoObject(cipher));
                 }catch (NoSuchAlgorithmException| NoSuchPaddingException | InvalidKeyException e){
