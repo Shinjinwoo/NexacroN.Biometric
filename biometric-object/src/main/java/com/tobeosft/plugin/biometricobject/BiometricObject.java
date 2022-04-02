@@ -119,6 +119,9 @@ public class BiometricObject extends NexacroPlugin {
                         }
 
                         mActivity.runOnUiThread(new Runnable() {
+
+                            // 프롬프트는 UI Thread 에서만 실행가능
+
                             @Override
                             public void run() {
                                 executeBiometricPrompt(biometricStrongOption, biometricWeakOption, biometricDeviceCredentialOption, biometricEncryptOption);
