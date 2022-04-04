@@ -1,3 +1,4 @@
 rootProject.name = "NexacroN.Biometric"
 include ':app'
 include ':biometric-object'
+include ':mediaplayer-object'

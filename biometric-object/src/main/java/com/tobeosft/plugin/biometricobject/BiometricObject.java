@@ -42,7 +42,9 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.concurrent.Executor;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
@@ -202,7 +204,8 @@ public class BiometricObject extends NexacroPlugin {
 
                         jsonObject.put("authType", result.getAuthenticationType());
                         if(result.getCryptoObject() != null) {
-                            jsonObject.put("cryptoObject", result.getCryptoObject().getCipher().getAlgorithm());
+                            Cipher returnCipher = result.getCryptoObject().getCipher();
+                            jsonObject.put("cryptoObject", result.getCryptoObject().getCipher().doFinal());
                         }
 
                         send(mServiceId, CALL_BACK, CODE_SUCCES, jsonObject.toString());
@@ -212,6 +215,10 @@ public class BiometricObject extends NexacroPlugin {
                     }
 
                 } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (BadPaddingException e) {
+                    e.printStackTrace();
+                } catch (IllegalBlockSizeException e) {
                     e.printStackTrace();
                 }
             }
@@ -311,6 +318,8 @@ public class BiometricObject extends NexacroPlugin {
                 }catch (NoSuchAlgorithmException| NoSuchPaddingException | InvalidKeyException e){
                     send(CODE_ERROR,e);
                 }
+            } else {
+                send(CODE_ERROR,METHOD_CALLMETHOD + "Android 10이상 부터 이용 가능 합니다.");
             }
         } else if (promptInfo == null ){
             send(CODE_ERROR, METHOD_CALLMETHOD + "생체인증 옵션이 켜져있지 않습니다.");
@@ -334,12 +343,12 @@ public class BiometricObject extends NexacroPlugin {
 
             case BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE:
                 Log.e(LOG_TAG, "No biometric features available on this device.");
-                send(CODE_SUCCES, "No biometric features available on this device.");
+                send(CODE_ERROR, "No biometric features available on this device.");
                 break;
 
             case BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE:
                 Log.e(LOG_TAG, "Biometric features are currently unavailable.");
-                send(CODE_SUCCES, "Biometric features are currently unavailable.");
+                send(CODE_ERROR, "Biometric features are currently unavailable.");
                 break;
 
             case BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED:
