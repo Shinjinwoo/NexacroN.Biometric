@@ -116,6 +116,7 @@ public class BiometricObject extends NexacroPlugin {
                         boolean biometricDeviceCredentialOption = Boolean.parseBoolean(param.getString("biometricDeviceCredentialOption"));
                         boolean biometricEncryptOption = Boolean.parseBoolean(param.getString("biometricEncryptOption"));
 
+
                         if (biometricEncryptOption) {
                             mKeyName = param.getString("biometricSecretKeyName");
                         }
