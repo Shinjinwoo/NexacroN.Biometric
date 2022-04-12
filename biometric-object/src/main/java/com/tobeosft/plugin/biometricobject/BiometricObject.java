@@ -11,6 +11,7 @@ import android.os.Build;
 import android.provider.Settings;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -29,6 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -69,6 +71,8 @@ public class BiometricObject extends NexacroPlugin {
 
     private String mKeyName = "";
     private String biometricEncryptMessage = "";
+
+    private boolean mBiometricDecryptOption = false;
 
 
     private NexacroActivity mActivity;
@@ -114,6 +118,8 @@ public class BiometricObject extends NexacroPlugin {
                         boolean biometricDeviceCredentialOption = Boolean.parseBoolean(param.getString("biometricDeviceCredentialOption"));
                         boolean biometricEncryptOption = Boolean.parseBoolean(param.getString("biometricEncryptOption"));
 
+                        mBiometricDecryptOption = Boolean.parseBoolean(param.getString("biometricDecryptOption"));
+
 
                         if (biometricEncryptOption) {
                             mKeyName = param.getString("biometricSecretKeyName");
@@ -127,7 +133,7 @@ public class BiometricObject extends NexacroPlugin {
                             @Override
                             public void run() {
                                 try {
-                                    executeBiometricPrompt(biometricStrongOption, biometricWeakOption, biometricDeviceCredentialOption, biometricEncryptOption,biometricEncryptMessage );
+                                    executeBiometricPrompt(biometricStrongOption, biometricWeakOption, biometricDeviceCredentialOption, biometricEncryptOption, biometricEncryptMessage);
                                 } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
                                     e.printStackTrace();
                                 }
@@ -202,30 +208,40 @@ public class BiometricObject extends NexacroPlugin {
                             "Authentication succeeded!", Toast.LENGTH_SHORT).show();
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        Log.e(LOG_TAG, String.valueOf(result.getAuthenticationType()));
 
-                        JSONObject jsonObject = new JSONObject();
+                        if (!mBiometricDecryptOption) {
+                            Log.e(LOG_TAG, String.valueOf(result.getAuthenticationType()));
 
-                        jsonObject.put("authType", result.getAuthenticationType());
-                        if(result.getCryptoObject() != null) {
+                            JSONObject jsonObject = new JSONObject();
+                            jsonObject.put("authType", result.getAuthenticationType());
+                            if (result.getCryptoObject() != null) {
+                                byte[] encryptBytes = result.getCryptoObject().getCipher().doFinal(biometricEncryptMessage.getBytes(StandardCharsets.UTF_8));
 
-                            Cipher returnCipher = result.getCryptoObject().getCipher();
-                            byte[] encryptBytes = returnCipher.doFinal(biometricEncryptMessage.getBytes(StandardCharsets.UTF_8));
+                                String encryptString = Base64.encodeToString(encryptBytes, Base64.NO_WRAP);
+                                jsonObject.put("encryptData", encryptString);
 
-                            jsonObject.put("encryptData",encryptBytes.toString());
+                                send(mServiceId, CALL_BACK, CODE_SUCCESS, jsonObject.toString());
+                            }
+
+                        } else {
+                            JSONObject jsonObject = new JSONObject();
+                            jsonObject.put("authType", result.getAuthenticationType());
+                            if (result.getCryptoObject() != null) {
+                                byte[] encryptBytes = result.getCryptoObject().getCipher().doFinal(biometricEncryptMessage.getBytes(StandardCharsets.UTF_8));
+
+                                String encryptString = Base64.encodeToString(encryptBytes, Base64.NO_WRAP);
+                                jsonObject.put("encryptData", encryptString);
+
+                                send(mServiceId, CALL_BACK, CODE_SUCCESS, jsonObject.toString());
+                            }
                         }
 
-                        send(mServiceId, CALL_BACK, CODE_SUCCESS, jsonObject.toString());
 
                     } else {
                         send(CODE_ERROR, METHOD_CALLMETHOD + "Android 10 이상이어야 합니다.");
                     }
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (BadPaddingException e) {
-                    e.printStackTrace();
-                } catch (IllegalBlockSizeException e) {
+                } catch (JSONException | BadPaddingException | IllegalBlockSizeException e) {
                     e.printStackTrace();
                 }
             }
@@ -274,15 +290,13 @@ public class BiometricObject extends NexacroPlugin {
                 if (keyGenerator != null) {
                     keyGenerator.generateKey();
                 }
-            } else{
-                send(CODE_ERROR,"Android M 이상의 API가 필요합니다.");
+            } else {
+                send(CODE_ERROR, "Android M 이상의 API가 필요합니다.");
             }
         } catch (NoSuchProviderException | NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
             e.printStackTrace();
         }
     }
-
-
 
 
     public void executeBiometricPrompt(boolean biometricStrong, boolean biometricWeak, boolean biometricDevice, boolean biometricEncryptOption, String biometricEncryptMessage) throws NoSuchAlgorithmException, NoSuchPaddingException {
@@ -328,13 +342,13 @@ public class BiometricObject extends NexacroPlugin {
                     biometricPrompt.authenticate(promptInfo,
                             new BiometricPrompt.CryptoObject(cipher));
 
-                }catch (InvalidKeyException e){
-                    send(CODE_ERROR,e);
+                } catch (InvalidKeyException e) {
+                    send(CODE_ERROR, e);
                 }
             } else {
-                send(CODE_ERROR,METHOD_CALLMETHOD + "Android 10이상 부터 이용 가능 합니다.");
+                send(CODE_ERROR, METHOD_CALLMETHOD + "Android 10이상 부터 이용 가능 합니다.");
             }
-        } else if (promptInfo == null ){
+        } else if (promptInfo == null) {
             send(CODE_ERROR, METHOD_CALLMETHOD + "생체인증 옵션이 켜져있지 않습니다.");
         } else {
             biometricPrompt.authenticate(promptInfo);

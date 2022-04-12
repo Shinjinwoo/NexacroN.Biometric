@@ -35,7 +35,7 @@ public class MainActivity extends NexacroUpdatorActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         NexacroResourceManager.createInstance(this);
-        NexacroResourceManager.getInstance().setDirect(true);
+        NexacroResourceManager.getInstance().setDirect(false);
 
         Intent intent = getIntent();
         if(intent != null) {
