@@ -27,10 +27,10 @@ public class MediaPlayerViewListner implements TextureView.SurfaceTextureListene
             // 먼저 사용할 미디어 플레이어를 만든다.
             MediaPlayer mPlayer = new MediaPlayer();
 
-            // 인자로 들어온 surfaceTexture를 기반으로 Surface를 하나 생성한다.
+            // 인자로 들어온 surfaceTexture 기반으로 Surface 하나 생성한다.
             Surface surface = new Surface(surfaceTexture);
 
-            // 만들어진 Surface를 미디어 플레이어에 세팅한다.
+            // 만들어진 Surface 미디어 플레이어에 세팅한다.
             mPlayer.setSurface(surface);
 
             // 미디어 플레이어의 비디오 소스를 세팅한다.
@@ -43,7 +43,8 @@ public class MediaPlayerViewListner implements TextureView.SurfaceTextureListene
             // 준비 함수는 prepare()와 prepareAsync()가 있는데 각각 동기, 비동기 버전이다.
             // 지금과 같은 로컬 파일의 경우 prepare()로 동기 처리를 해도 되지만,
             // 스트리밍을 할 때에는 반드시 prepareAsync()로 비동기 처리를 해야 한다.
-            // 모든 경우에 그냥 비동기 처리를 하는 것이 좋은 습관이다.
+            // 모든 경우에 그냥 비동기 처리를 하는 것이 좋은 습관이다. --> 과연 ?
+
             mPlayer.prepareAsync();
 
             // 준비가 끝나는 지점을 알기 위해 리스너를 등록한다.
