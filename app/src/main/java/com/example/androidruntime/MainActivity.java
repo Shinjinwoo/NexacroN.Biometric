@@ -7,6 +7,7 @@ import static androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTI
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,6 +25,8 @@ public class MainActivity extends NexacroUpdatorActivity {
         setBootstrapURL("http://smart.tobesoft.co.kr/NexacroN/Biometric/_android_/start_android.json");
         setProjectURL("http://smart.tobesoft.co.kr/NexacroN/Biometric/_android_/");
         setRPP("9223");
+
+        Log.d("test","test");
 
 
         this.setStartupClass(NexacroActivityExt.class);
