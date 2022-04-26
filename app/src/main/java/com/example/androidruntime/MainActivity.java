@@ -27,6 +27,7 @@ public class MainActivity extends NexacroUpdatorActivity {
         setRPP("9223");
 
         Log.d("test","test");
+        Log.d("test","test");
 
 
         this.setStartupClass(NexacroActivityExt.class);
