@@ -26,8 +26,6 @@ public class MainActivity extends NexacroUpdatorActivity {
         setProjectURL("http://smart.tobesoft.co.kr/NexacroN/Biometric/_android_/");
         setRPP("9223");
 
-        Log.d("test","test");
-        Log.d("test","test");
 
 
         this.setStartupClass(NexacroActivityExt.class);
